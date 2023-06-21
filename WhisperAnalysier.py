@@ -17,11 +17,11 @@ class WhisperAnalysier():
     def __init__(self, model_size = "base", model_type="cuda", transcribe_file="transcript.txt") -> None:
         if model_type == "cuda":
             try:
-                self.model = WhisperModel(model_size, device="cuda", compute_type="float16")
+                self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=6)
             except:
-                self.model = WhisperModel(model_size, device="cpu", compute_type="int8")
+                self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
         else:
-            self.model = WhisperModel(model_size, device="cpu", compute_type="int8")
+            self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
         self.data = None
         self.samplerate = None
         self.noSections = None
@@ -32,6 +32,7 @@ class WhisperAnalysier():
         self.transcribe_file =  transcribe_file
         # self.segments = []
         self.writeInTxtIsWork = False
+        self.latestText = "Телефонный звонок. "
 
 
     def __createTmpSoundFile(self, prefix:float, duration:float) -> str:
@@ -50,19 +51,26 @@ class WhisperAnalysier():
 
 
     def __fileWhisperAnalyze(self, prefix:float):
+        now = datetime.datetime.now()
         filename = f"sounds/test{prefix}.wav"
         # now = datetime.datetime.now()
-        segments, _ = self.model.transcribe(filename, language="ru")
+        segments, _ = self.model.transcribe(filename, language="ru", initial_prompt=self.latestText, word_timestamps=True, beam_size=5, best_of=10, condition_on_previous_text = False) #max_initial_timestamp=0.5
         # self.segments.append(segments)
+        text_l = ""
         for segment in segments:
             with open(self.transcribe_file, 'a', encoding='utf-8') as f:
-                if segment.no_speech_prob > 0.78:
+                if segment.no_speech_prob > 0.5:
                     text_i = ""
                 else:
                     text_i = segment.text
+                text_l += text_i
                 f.write(text_i)
+            # print(segment)
+        self.latestText += text_l
+        if len(self.latestText) > 2000:
+            self.latestText = self.latestText[0:19] + self.latestText[-1500:-1]
         #     print("[%.2fs -> %.2fs] %s при prefix = %f" % (segment.start, segment.end, segment.text, prefix))
-        # print(datetime.datetime.now() - now)
+        print(datetime.datetime.now() - now)
         os.remove(filename)
 
     def analyzeWithoutThread(self, input_type = "file", duration = 3, step = 1.5, name = "test.wav") -> None:
@@ -206,8 +214,8 @@ class WhisperAnalysier():
             prefix += step
 
 def startWaProcess():
-    wa = WhisperAnalysier(model_size="large-v2")
-    wa.analyzeWithThread(input_type="file", duration=3, step=1)
+    wa = WhisperAnalysier(model_size="large-v2", model_type="cuda")
+    wa.analyzeWithThread(input_type="file", duration=4, step=3.92)
 
 if __name__ == "__main__":
     wap = Process(target=startWaProcess)
