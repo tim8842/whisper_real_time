@@ -34,6 +34,12 @@ class MicrophoneGenerator():
         while self.isRecording:
             self.__createTempFiles(duration, step)
 
+    # async def recordAsync(self, duration = 3, step = 1.5) -> None:
+    #     print("start recording")
+    #     self.isRecording = True
+    #     while self.isRecording:
+    #         self.__createTempFiles(duration, step)
+
     def record(self, duration = 3, step = 1.5) -> None:
         t = Thread(target=self.__recordThread, args=(duration, step,))
         t.daemon = True

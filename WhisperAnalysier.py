@@ -51,18 +51,24 @@ class WhisperAnalysier():
 
     def __fileWhisperAnalyze(self, prefix:float):
         filename = f"sounds/test{prefix}.wav"
-        now = datetime.datetime.now()
+        # now = datetime.datetime.now()
         segments, _ = self.model.transcribe(filename, language="ru")
         # self.segments.append(segments)
         for segment in segments:
             with open(self.transcribe_file, 'a', encoding='utf-8') as f:
-                f.write(segment.text)
-            print("[%.2fs -> %.2fs] %s при prefix = %f" % (segment.start, segment.end, segment.text, prefix))
-        print(datetime.datetime.now() - now)
+                if segment.no_speech_prob > 0.78:
+                    text_i = ""
+                else:
+                    text_i = segment.text
+                f.write(text_i)
+        #     print("[%.2fs -> %.2fs] %s при prefix = %f" % (segment.start, segment.end, segment.text, prefix))
+        # print(datetime.datetime.now() - now)
         os.remove(filename)
 
     def analyzeWithoutThread(self, input_type = "file", duration = 3, step = 1.5, name = "test.wav") -> None:
         self.input_type = input_type
+        with open(self.transcribe_file, 'w', encoding='utf-8') as f:
+            pass
         self.__deleteAndCreateCatalog()
         if input_type == "file":
             self.data, self.samplerate = sf.read(name)
@@ -75,6 +81,37 @@ class WhisperAnalysier():
             self.micGen.stop_stream()
         else:
             raise SystemExit(f"error in input_type, it can't be {input_type}, mb 'file' or 'microphone'")
+
+    # def __analyzeMicrophoneAsync(self, duration, step):
+    #     try:
+    #         self.micGen.record(duration, step)
+    #         fw = Thread(target=self.__fileWhisperStreamThread, args=(step,))
+    #         # w = Thread(target=self.__writeInTxt, args=(0,))
+    #         # w.daemon = True
+    #         fw.daemon = True
+    #         self.fwThreadIsWork = True
+    #         fw.start()
+    #         # self.writeInTxtIsWork = True
+    #         # w.start()
+    #         while True:
+    #             time.sleep(1)
+    #     except KeyboardInterrupt:
+    #         print("thread ended")
+
+    # def analyzeAsync(self, input_type = "file", duration = 3, step = 1.5, name = "test.wav") -> None:
+    #     self.input_type = input_type
+    #     self.__deleteAndCreateCatalog()
+    #     if input_type == "file":
+    #         self.data, self.samplerate = sf.read(name)
+    #         self.noSections = int(np.ceil(len(self.data) / self.samplerate))
+    #         self.__analyzeFileStreamWithoutThread(duration, step)
+    #     elif input_type == "microphone":
+    #         self.micGen = self.__createMicrophoneInstance()
+    #         self.micGen.start_stream()
+    #         self.__analyzeMicrophoneStreamWithoutThread(duration, step)
+    #         self.micGen.stop_stream()
+    #     else:
+    #         raise SystemExit(f"error in input_type, it can't be {input_type}, mb 'file' or 'microphone'")
 
     def __deleteAndCreateCatalog(self, path = "sounds"):
         try:
@@ -101,6 +138,8 @@ class WhisperAnalysier():
     def analyzeWithThread(self, input_type = "file", duration = 3, step = 1.5, name = "test.wav") -> None:
         self.input_type = input_type
         self.__deleteAndCreateCatalog()
+        with open(self.transcribe_file, 'w', encoding='utf-8') as f:
+            pass
         if input_type == "file":
             self.data, self.samplerate = sf.read(name)
             self.noSections = int(np.ceil(len(self.data) / self.samplerate))
@@ -128,7 +167,7 @@ class WhisperAnalysier():
                     prefix += step
                 else:
                     prefix = (prefix + step) % self.noSections
-            except Exception as e:
+            except FileNotFoundError as e:
                 pass
         self.fwThreadIsWork = False
 
@@ -166,6 +205,11 @@ class WhisperAnalysier():
             time.sleep(step)
             prefix += step
 
-if __name__ == "__main__":
+def startWaProcess():
     wa = WhisperAnalysier(model_size="large-v2")
     wa.analyzeWithThread(input_type="microphone", duration=3, step=2)
+
+if __name__ == "__main__":
+    wap = Process(target=startWaProcess)
+    wap.start()
+    wap.join()
