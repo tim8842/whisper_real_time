@@ -36,7 +36,7 @@ class WhisperAnalysier():
 
     def __createTmpSoundFile(self, prefix:float, duration:float) -> str:
         temp = self.data[int(prefix*self.samplerate):int(prefix*self.samplerate+self.samplerate*duration)]
-        filename = f"/sounds/test{prefix}.wav"
+        filename = f"sounds/test{prefix}.wav"
         sf.write(filename, temp, self.samplerate)
         return filename
 
@@ -207,7 +207,7 @@ class WhisperAnalysier():
 
 def startWaProcess():
     wa = WhisperAnalysier(model_size="large-v2")
-    wa.analyzeWithThread(input_type="microphone", duration=3, step=2)
+    wa.analyzeWithThread(input_type="file", duration=3, step=1)
 
 if __name__ == "__main__":
     wap = Process(target=startWaProcess)
