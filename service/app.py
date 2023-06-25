@@ -37,20 +37,10 @@ def get_text():
     task = long_task.delay(uploaded_file.filename)
     res = celery.AsyncResult(task.task_id)
     while not res.ready():
-        print("start1")
-        time.sleep(5)
-        print("start2")
+        time.sleep(0.25)
         res = celery.AsyncResult(task.task_id)
     answer = json.dumps({"answer": res.get()})
     return answer
-
-async def cycle_corut(res, task):
-    while not res.ready():
-        print("Start1")
-        await asyncio.sleep(5)
-        print("Start2")
-        res = celery.AsyncResult(task.task_id)
-    return res.get()
 
 @application.route("/get_text_async", methods=['POST'])
 async def get_text_async():
@@ -60,8 +50,11 @@ async def get_text_async():
     posted_data = json.load(request.files['datas'])                                                       
     task = long_task.delay(uploaded_file.filename)
     res = celery.AsyncResult(task.task_id)
-    result = await cycle_corut(res, task)
-    answer = json.dumps({"answer": result})
+    while not res.ready():
+        await asyncio.sleep(5)
+        print("Start")
+        res = celery.AsyncResult(task.task_id)
+    answer = json.dumps({"answer": res.get()})
     return answer
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, grequests
 import asyncio
 from flask import jsonify
 
@@ -24,15 +24,11 @@ def normal_request():
     r = requests.post(url, files=files)
     print(json.loads(r.content))
 
-async def async_request():
-    r = requests.post(async_url, files=files)
-    print(json.loads(r.content))
-
-async def async_main():
-    task1 = asyncio.create_task(async_request())
-    await task1
-
+def async_request():
+    r = grequests.post(url, files=files)
+    print("hello")
+    r = grequests.map([r])
+    print(json.loads(r[0].content))
 
 if __name__ == "__main__":
-    normal_request()
-    # asyncio.run(async_main())
+    async_request()
