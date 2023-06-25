@@ -215,7 +215,7 @@ class WhisperAnalysier():
 
 def startWaProcess():
     wa = WhisperAnalysier(model_size="large-v2", model_type="cuda")
-    wa.analyzeWithThread(input_type="file", duration=4, step=3.92)
+    wa.analyzeWithThread(input_type="microphone", duration=4, step=3.92)
 
 if __name__ == "__main__":
     wap = Process(target=startWaProcess)
