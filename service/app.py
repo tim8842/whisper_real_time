@@ -42,20 +42,5 @@ def get_text():
     answer = json.dumps({"answer": res.get()})
     return answer
 
-@application.route("/get_text_async", methods=['POST'])
-async def get_text_async():
-    uploaded_file = request.files['document']
-    if uploaded_file.filename != '':
-        uploaded_file.save(fila_dowmload_path + uploaded_file.filename)
-    posted_data = json.load(request.files['datas'])                                                       
-    task = long_task.delay(uploaded_file.filename)
-    res = celery.AsyncResult(task.task_id)
-    while not res.ready():
-        await asyncio.sleep(5)
-        print("Start")
-        res = celery.AsyncResult(task.task_id)
-    answer = json.dumps({"answer": res.get()})
-    return answer
-
 if __name__ == "__main__":
     application.run()
