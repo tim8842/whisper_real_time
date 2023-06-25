@@ -11,7 +11,7 @@ datas = {'var1' : 'var1','var2' : 'var2',}
 #my file to be sent
 local_file_to_send = "14302023113031707A.wav"
 
-url = BASE_URL + "/get_text_process"
+url = BASE_URL + "/get_text_celery"
 
 
 files = [
