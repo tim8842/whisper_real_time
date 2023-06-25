@@ -6,6 +6,7 @@ import asyncio
 import json
 from WhisperAnalysierWeb import WhisperAnalysier
 import os
+import random
 
 application = Flask(__name__)
 client = application.test_client()
@@ -28,18 +29,34 @@ whisper.analyze(path="test/test.wav")
 def long_task(name):
     return whisper.analyze(os.path.join(fila_dowmload_path, name), remove=True)
 
-@application.route("/get_text", methods=['POST'])
-def get_text():
+@application.route("/get_text_celery", methods=['POST'])
+def get_text_celery():
     uploaded_file = request.files['document']
     if uploaded_file.filename != '':
+        if os.path.exists(uploaded_file.filename):
+            rnd = random.randint(0, 10000)
+            uploaded_file.filename = uploaded_file.filename[0:-5] + str(rnd) + uploaded_file.filename[-4: -1]
         uploaded_file.save(fila_dowmload_path + uploaded_file.filename)
     posted_data = json.load(request.files['datas'])                                                       
     task = long_task.delay(uploaded_file.filename)
     res = celery.AsyncResult(task.task_id)
     while not res.ready():
-        time.sleep(0.25)
+        time.sleep(0.05)
         res = celery.AsyncResult(task.task_id)
     answer = json.dumps({"answer": res.get()})
+    return answer
+
+@application.route("/get_text_process", methods=['POST'])
+def get_text_process():
+    uploaded_file = request.files['document']
+    if uploaded_file.filename != '':
+        if os.path.exists(uploaded_file.filename):
+            rnd = random.randint(0, 10000)
+            uploaded_file.filename = uploaded_file.filename[0:-5] + str(rnd) + uploaded_file.filename[-4: -1]
+        uploaded_file.save(fila_dowmload_path + uploaded_file.filename)
+    posted_data = json.load(request.files['datas'])      
+    res = whisper.analyze(os.path.join(fila_dowmload_path, uploaded_file.filename), remove=True)                                              
+    answer = json.dumps({"answer": res})
     return answer
 
 if __name__ == "__main__":

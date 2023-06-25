@@ -11,9 +11,8 @@ datas = {'var1' : 'var1','var2' : 'var2',}
 #my file to be sent
 local_file_to_send = "14302023113031707A.wav"
 
-url = BASE_URL + "/get_text"
+url = BASE_URL + "/get_text_process"
 
-async_url = BASE_URL + "/get_text_async"
 
 files = [
     ('document', (local_file_to_send, open(local_file_to_send, 'rb'), 'application/octet')),
