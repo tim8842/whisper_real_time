@@ -60,7 +60,7 @@ def request_log(request):
 
 @celery.task
 def long_task(name: str) -> str:
-    return whisper.analyze(name, remove=True)
+    return whisper.analyze(name, remove=True, no_speech_prob=0.6)
 
 @application.route("/get_text_celery", methods=['POST'])
 def get_text_celery() -> Mapping[str, str]:
@@ -72,7 +72,6 @@ def get_text_celery() -> Mapping[str, str]:
         if os.path.exists(filename):
             rnd: int = random.randint(0, 10000)
             filename = filename[0:-4] +  str(rnd) +  filename[-4:]
-        print(filename)
         uploaded_file.save(filename)
         logger.debug(f"route: {request.path}, ip: {request.remote_addr}, saving_file: {filename}")
     posted_data: Mapping[str, T] = json.load(request.files['datas'])                                                      
@@ -83,8 +82,8 @@ def get_text_celery() -> Mapping[str, str]:
         time.sleep(0.05)
         res = celery.AsyncResult(task.task_id)
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper celery end: task_id = {task.task_id}")  
-    answer: Mapping[str, str] = json.dumps({"answer": res.get()})
-    logger.debug(f"route: {request.path}, ip: {request.remote_addr} request end, result: {answer}")  
+    answer = json.dumps({"answer": res.get()})
+    logger.debug(f"route: {request.path}, ip: {request.remote_addr} request end, result: {json.loads(answer)}")  
     return answer
 
 @application.route("/get_text_process", methods=['POST'])
@@ -97,12 +96,11 @@ def get_text_process():
         if os.path.exists(filename):
             rnd = random.randint(0, 10000)
             filename = filename[0:-4] +  str(rnd) +  filename[-4:]
-        print(filename)
         uploaded_file.save(filename)
         logger.debug(f"route: {request.path}, ip: {request.remote_addr}, saving_file: {filename}")
     posted_data = json.load(request.files['datas']) 
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper start") 
-    res = whisper.analyze(filename, remove=True) 
+    res = whisper.analyze(filename, remove=True, no_speech_prob=0.6) 
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper end")                                              
     answer = json.dumps({"answer": res})
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} request end, result: {json.loads(answer)}")   
