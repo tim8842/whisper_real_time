@@ -7,45 +7,45 @@ import json
 from WhisperAnalysierWeb import WhisperAnalysier
 import os
 import random
+from typing import List, Union, Optional, Mapping, T
 
 application = Flask(__name__)
-client = application.test_client()
 
-REDIS_HOSTS = '127.0.0.1'
-REDIS_PORT = '6379'
+REDIS_HOSTS: str = '127.0.0.1'
+REDIS_PORT: str = '6379'
 
-application.config['CELERY_BROKER_URL'] = 'redis://' + REDIS_HOSTS + ':' + REDIS_PORT + '/0'
-application.config['CELERY_RESULT_BACKEND'] = 'redis://' + REDIS_HOSTS + ':' + REDIS_PORT + '/0'
+application.config['CELERY_BROKER_URL']: str = 'redis://' + REDIS_HOSTS + ':' + REDIS_PORT + '/0'
+application.config['CELERY_RESULT_BACKEND']: str = 'redis://' + REDIS_HOSTS + ':' + REDIS_PORT + '/0'
 
 celery = Celery(application.name, broker=application.config['CELERY_BROKER_URL'], backend=application.config['CELERY_RESULT_BACKEND'])
 celery.conf.update(application.config)
 
-fila_dowmload_path = "sounds/"
+fila_dowmload_path: str = os.path.abspath("sounds/")
 
-whisper = WhisperAnalysier(model_size="large-v2", transcribe_file="test/transcript.txt")
-whisper.analyze(path="test/test.wav")
+whisper = WhisperAnalysier(model_size="large-v2")
+whisper.analyze(path=os.path.abspath("test/test.wav"))
 
 @celery.task
-def long_task(name):
+def long_task(name: str) -> str:
     return whisper.analyze(name, remove=True)
 
 @application.route("/get_text_celery", methods=['POST'])
-def get_text_celery():
+def get_text_celery() -> Mapping[str, str]:
     uploaded_file = request.files['document']
-    filename = fila_dowmload_path + uploaded_file.filename
+    filename: str = os.path.join(fila_dowmload_path, uploaded_file.filename)
     if uploaded_file.filename != '':
         if os.path.exists(filename):
-            rnd = random.randint(0, 10000)
-            filename = filename[0:-4] + str(rnd) + filename[-4:]
+            rnd: int = random.randint(0, 10000)
+            filename = filename[0:-4] +  str(rnd) +  filename[-4:]
         print(filename)
         uploaded_file.save(filename)
-    posted_data = json.load(request.files['datas'])                                                       
+    posted_data: Mapping[str, T] = json.load(request.files['datas'])                                                       
     task = long_task.delay(filename)
     res = celery.AsyncResult(task.task_id)
     while not res.ready():
         time.sleep(0.05)
         res = celery.AsyncResult(task.task_id)
-    answer = json.dumps({"answer": res.get()})
+    answer: Mapping[str, str] = json.dumps({"answer": res.get()})
     return answer
 
 @application.route("/get_text_process", methods=['POST'])
@@ -55,7 +55,7 @@ def get_text_process():
     if uploaded_file.filename != '':
         if os.path.exists(filename):
             rnd = random.randint(0, 10000)
-            filename = filename[0:-4] + str(rnd) + filename[-4:]
+            filename = filename[0:-4] +  str(rnd) +  filename[-4:]
         print(filename)
         uploaded_file.save(filename)
     posted_data = json.load(request.files['datas'])      

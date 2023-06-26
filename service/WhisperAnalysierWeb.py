@@ -5,10 +5,25 @@ import time
 import os
 import datetime
 import soundfile as sf
+from numpy.typing import NDArray
+from typing import List, Union, Optional
 import random
 
 class WhisperAnalysier():
-    def __init__(self, model_size = "base", model_type="cuda", transcribe_file="transcript.txt") -> None:
+    """
+        Класс WhisperAnalusier предназначен для анализа звуковых 
+        дорожек.
+    """
+    def __init__(self, model_size: str = "base", model_type: str = "cuda") -> None: # transcribe_file: str = "transcript.txt"
+        """
+            Инициализация
+            Аргументы:
+              model_size: размер модели, в зависимости от нее модель лучше или хуже распознает слова
+                также влияет на скорость выполнения (tiny, tiny.en, base, base.en,
+                small, small.en, medium, medium.en, large-v1, or large-v2)
+              model_type: устройство на чем будет работать анализ отрывков.
+                cuda - видеокарта, cpu - процессор
+        """
         if model_type == "cuda":
             try:
                 self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=6)
@@ -16,22 +31,32 @@ class WhisperAnalysier():
                 self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
         else:
             self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
-        self.data = None
-        self.samplerate = None
-        self.noSections = None
-        self.transcribe_file =  transcribe_file
-        self.processes_dict = dict()
+        self.data: Optional[NDArray] = None
+        self.samplerate: Optional[int] = None
+        self.noSections: Optional[int] = None
+        # self.transcribe_file: str =  transcribe_file
 
-    def __fileWhisperAnalyze(self, path, remove):
+    def __fileWhisperAnalyze(self, path: str, remove: Union[bool, int, None], no_speech_prob: float) -> str:
+        """
+            Функция отвечает за анализ файла и выдачи теккстового результата
+            Аргументы:
+              path: Путь до файла (звукового), который нужно обработать
+              remove: Удалять ли файл после анализа или нет
+              no_speech_prob: Значение вероятности, того, что на участке звуковой дорожке
+                нет речи. Если больше этой вероятности, то слова не будут определяться
+            Возвращает:
+              Строку, результат обработки
+        """
         now = datetime.datetime.now()
         # rnd = random.randint(0, 10000)
-        filename = path
+        filename: str = path
+        
         # if os.path.exists(filename):
         segments, _ = self.model.transcribe(filename, language="ru", initial_prompt="Phone call", best_of=1, beam_size=1, condition_on_previous_text= False) #max_initial_timestamp=0.5
-        text_l = ""
+        text_l: str = ""
         for segment in segments:
-            if segment.no_speech_prob > 0.8:
-                text_i = ""
+            if segment.no_speech_prob > no_speech_prob:
+                text_i: str = ""
             else:
                 text_i = segment.text
                 text_l += text_i
@@ -40,15 +65,24 @@ class WhisperAnalysier():
         print(datetime.datetime.now() - now)
         if remove:
             os.remove(filename)
-        return(text_l)
+        return text_l
 
-    def analyze(self, path = "test.wav", remove=False) -> None:
+    def analyze(self, path: str = "test.wav", remove:Union[bool, int, None] = False, no_speech_prob: float = 0.8) -> str:
+        """
+            Функция отвечает за считывание параметров звукового файла
+            и применение функции анализа
+            Аргументы:
+              path: Путь до файла (звукового), который нужно проанализировать
+              remove: Удалять ли файл после анализа или нет
+            Возвращает:
+              Строку, результат обработки
+        """
         # with open(self.transcribe_file, 'w', encoding='utf-8') as f:
         #     pass
         self.data, self.samplerate = sf.read(path)
         self.noSections = int(np.ceil(len(self.data) / self.samplerate))
         try:
-            return self.__fileWhisperAnalyze(path, remove)
+            return self.__fileWhisperAnalyze(path, remove, no_speech_prob)
         except FileNotFoundError as e:
             return "error"
  
