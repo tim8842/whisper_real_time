@@ -30,6 +30,8 @@ celery.conf.update(application.config)
 
 files_download_path: str = os.path.abspath("sounds/")
 
+print(files_download_path)
+
 whisper = WhisperAnalysier(model_size=MODEL_SIZE)
 whisper.analyze(path=os.path.abspath(TEST_FILE))
 
@@ -66,7 +68,7 @@ def long_task(name: str) -> str:
 def get_text_celery() -> Mapping[str, str]:
     request_log(request)
     uploaded_file = request.files['document']
-    uploaded_file.filename = uploaded_file.filename.split("\\")[-1]
+    uploaded_file.filename = "/" + uploaded_file.filename.split("\\")[-1]
     filename: str = os.path.join(files_download_path, uploaded_file.filename)
     if uploaded_file.filename != '':
         if os.path.exists(filename):
@@ -90,8 +92,10 @@ def get_text_celery() -> Mapping[str, str]:
 def get_text_process():
     request_log(request)
     uploaded_file = request.files['document']
-    uploaded_file.filename = uploaded_file.filename.split("\\")[-1]
+    uploaded_file.filename = "/" + uploaded_file.filename.split("\\")[-1]
     filename = files_download_path + uploaded_file.filename
+    print(uploaded_file.filename)
+    print(filename)
     if uploaded_file.filename != '':
         if os.path.exists(filename):
             rnd = random.randint(0, 10000)
