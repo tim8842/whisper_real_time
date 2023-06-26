@@ -52,7 +52,7 @@ class WhisperAnalysier():
         filename: str = path
         
         # if os.path.exists(filename):
-        segments, _ = self.model.transcribe(filename, language="ru", initial_prompt="Phone call", best_of=1, beam_size=1, condition_on_previous_text= False) #max_initial_timestamp=0.5
+        segments, _ = self.model.transcribe(filename, language="ru", beam_size=1, best_of=1, patience=0.5, without_timestamps=True) #max_initial_timestamp=0.5
         text_l: str = ""
         for segment in segments:
             if segment.no_speech_prob > no_speech_prob:

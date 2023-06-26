@@ -32,6 +32,7 @@ def long_task(name: str) -> str:
 @application.route("/get_text_celery", methods=['POST'])
 def get_text_celery() -> Mapping[str, str]:
     uploaded_file = request.files['document']
+    uploaded_file.filename = uploaded_file.filename.split("\\")[-1]
     filename: str = os.path.join(fila_dowmload_path, uploaded_file.filename)
     if uploaded_file.filename != '':
         if os.path.exists(filename):
@@ -51,6 +52,7 @@ def get_text_celery() -> Mapping[str, str]:
 @application.route("/get_text_process", methods=['POST'])
 def get_text_process():
     uploaded_file = request.files['document']
+    uploaded_file.filename = uploaded_file.filename.split("\\")[-1]
     filename = fila_dowmload_path + uploaded_file.filename
     if uploaded_file.filename != '':
         if os.path.exists(filename):
