@@ -26,14 +26,15 @@ class WhisperAnalysier():
         """
         if model_type == "cuda":
             try:
-                self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=6)
+                self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=12)
             except:
-                self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
+                self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=12)
         else:
-            self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
+            self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=12)
         self.data: Optional[NDArray] = None
         self.samplerate: Optional[int] = None
         self.noSections: Optional[int] = None
+        self.latestText: str = "Телефонный звонок. "
         # self.transcribe_file: str =  transcribe_file
 
     def __fileWhisperAnalyze(self, path: str, remove: Union[bool, int, None], no_speech_prob: float) -> str:
@@ -52,7 +53,7 @@ class WhisperAnalysier():
         filename: str = path
         
         # if os.path.exists(filename):
-        segments, _ = self.model.transcribe(filename, language="ru", beam_size=1, best_of=1, patience=0.5, without_timestamps=True) #max_initial_timestamp=0.5
+        segments, _ = self.model.transcribe(filename, language="ru", beam_size=5, best_of=5, patience=0.1, initial_prompt=self.latestText) #max_initial_timestamp=0.5
         text_l: str = ""
         for segment in segments:
             if segment.no_speech_prob > no_speech_prob:
@@ -60,6 +61,9 @@ class WhisperAnalysier():
             else:
                 text_i = segment.text
                 text_l += text_i
+        self.latestText += text_l
+        if len(self.latestText) > 2000:
+            self.latestText = self.latestText[0:19] + self.latestText[-1500:-1]
             # with open(self.transcribe_file, 'a', encoding='utf-8') as f:
             #     f.write(text_i)
         print(datetime.datetime.now() - now)
