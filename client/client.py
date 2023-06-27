@@ -4,7 +4,7 @@ from flask import jsonify
 from typing import Mapping, List
 import os
 
-BASE_URL = "https://727a-5-253-144-121.ngrok-free.app"
+BASE_URL = "https://756c-5-253-144-121.ngrok-free.app"
 
 
 # Ton to be sent

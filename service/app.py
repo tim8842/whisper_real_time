@@ -30,7 +30,6 @@ celery.conf.update(application.config)
 
 files_download_path: str = os.path.abspath("sounds/")
 
-print(files_download_path)
 
 whisper = WhisperAnalysier(model_size=MODEL_SIZE)
 whisper.analyze(path=os.path.abspath(TEST_FILE))
@@ -113,4 +112,4 @@ def get_text_process():
 if __name__ == "__main__":
     logger.debug("logger was initialized")
     logger.debug(started_info)
-    application.run()
+    application.run(debug=False, host="0.0.0.0")
