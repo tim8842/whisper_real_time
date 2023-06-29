@@ -34,7 +34,6 @@ class WhisperAnalysier():
         self.data: Optional[NDArray] = None
         self.samplerate: Optional[int] = None
         self.noSections: Optional[int] = None
-        self.latestText: str = "Телефонный звонок. "
         # self.transcribe_file: str =  transcribe_file
 
     def __fileWhisperAnalyze(self, path: str, remove: Union[bool, int, None], no_speech_prob: float) -> str:
@@ -53,25 +52,18 @@ class WhisperAnalysier():
         filename: str = path
         
         # if os.path.exists(filename):
-        segments, _ = self.model.transcribe(filename, language="ru", beam_size=5, best_of=5, patience=0.1, initial_prompt=self.latestText) #max_initial_timestamp=0.5
+        segments, _ = self.model.transcribe(filename, language="ru", vad_filter=True, vad_parameters=dict(min_silence_duration_ms=2980), word_timestamps=True, beam_size=5, best_of=5, condition_on_previous_text=False) #max_initial_timestamp=0.5
         text_l: str = ""
         for segment in segments:
-            if segment.no_speech_prob > no_speech_prob:
-                text_i: str = ""
-            else:
-                text_i = segment.text
-                text_l += text_i
-        self.latestText += text_l
-        if len(self.latestText) > 2000:
-            self.latestText = self.latestText[0:19] + self.latestText[-1500:-1]
-            # with open(self.transcribe_file, 'a', encoding='utf-8') as f:
-            #     f.write(text_i)
+            text_i: str = segment.text
+            text_l += text_i
+            print(segment)
         print(datetime.datetime.now() - now)
         if remove:
             os.remove(filename)
         return text_l
 
-    def analyze(self, path: str = "test.wav", remove:Union[bool, int, None] = False, no_speech_prob: float = 0.8) -> str:
+    def analyze(self, path: str = "test.wav", remove:Union[bool, int, None] = False, no_speech_prob: float = 0.7) -> str:
         """
             Функция отвечает за считывание параметров звукового файла
             и применение функции анализа

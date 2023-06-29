@@ -70,7 +70,7 @@ def get_text_celery() -> Mapping[str, str]:
     uploaded_file.filename = "/" + uploaded_file.filename.split("\\")[-1]
     filename: str = os.path.join(files_download_path, uploaded_file.filename)
     if uploaded_file.filename != '':
-        if os.path.exists(filename):
+        while os.path.exists(filename):
             rnd: int = random.randint(0, 10000)
             filename = filename[0:-4] +  str(rnd) +  filename[-4:]
         uploaded_file.save(filename)
@@ -96,7 +96,7 @@ def get_text_process():
     print(uploaded_file.filename)
     print(filename)
     if uploaded_file.filename != '':
-        if os.path.exists(filename):
+        while os.path.exists(filename):
             rnd = random.randint(0, 10000)
             filename = filename[0:-4] +  str(rnd) +  filename[-4:]
         uploaded_file.save(filename)
