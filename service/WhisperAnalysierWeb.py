@@ -34,9 +34,11 @@ class WhisperAnalysier():
         self.data: Optional[NDArray] = None
         self.samplerate: Optional[int] = None
         self.noSections: Optional[int] = None
+        self.lastSentence: Optional[str] = None
+        self.wordToShift: Optional[str] = None
         # self.transcribe_file: str =  transcribe_file
 
-    def __fileWhisperAnalyze(self, path: str, remove: Union[bool, int, None], no_speech_prob: float) -> str:
+    def __fileWhisperAnalyze(self, path: str, remove: Union[bool, int, None], no_speech_prob: float, step:float = 1.5) -> str:
         """
             Функция отвечает за анализ файла и выдачи теккстового результата
             Аргументы:
@@ -52,14 +54,41 @@ class WhisperAnalysier():
         filename: str = path
         
         # if os.path.exists(filename):
-        seconds = len(self.data) / self.samplerate
-        ms = seconds * 1000 - 20
-        segments, _ = self.model.transcribe(filename, language="ru", vad_filter=True, vad_parameters=dict(min_silence_duration_ms=ms), word_timestamps=True, beam_size=5, best_of=5, condition_on_previous_text=False) #max_initial_timestamp=0.5
+        audioLenghtS: float = len(self.data) / self.samplerate - 0.2
+        ms: float = audioLenghtS * 1000 - 200
+        segments, _ = self.model.transcribe(filename, language="ru" , vad_filter=True, vad_parameters=dict(min_silence_duration_ms=ms), word_timestamps=True, beam_size=5, best_of=5, condition_on_previous_text=False) #max_initial_timestamp=0.5
         text_l: str = ""
+        last_w = ""
         for segment in segments:
-            text_i: str = segment.text
-            text_l += text_i
-            print(segment)
+            print(self.lastSentence)
+            for word in segment.words:
+                if not self.lastSentence:
+                    print(f"word.end {word.end} audiol {audioLenghtS}")
+                    if word.end < audioLenghtS:
+                        text_l += word.word
+                    else:
+                        self.wordToShift = word
+                        self.lastSentence = True
+                else:
+                    if word.start <= self.wordToShift.start - step:
+                        last_w = word.word
+                    if word.start >= step:
+                        if word.end < audioLenghtS:
+                            text_l += word.word
+                        else:
+                            self.wordToShift = word
+                text_l = last_w + text_l
+        # if text_l == "":
+        #     self.lastSentence = None
+
+                    
+
+
+                # print(f"{word.word} start {word.start} end {word.end}")
+        # for segment in segments:
+        #     text_i: str = segment.text
+        #     text_l += text_i
+        #     print(segment)
         print(datetime.datetime.now() - now)
         if remove:
             os.remove(filename)
