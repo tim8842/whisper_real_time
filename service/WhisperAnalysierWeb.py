@@ -52,7 +52,9 @@ class WhisperAnalysier():
         filename: str = path
         
         # if os.path.exists(filename):
-        segments, _ = self.model.transcribe(filename, language="ru", vad_filter=True, vad_parameters=dict(min_silence_duration_ms=2980), word_timestamps=True, beam_size=5, best_of=5, condition_on_previous_text=False) #max_initial_timestamp=0.5
+        seconds = len(self.data) / self.samplerate
+        ms = seconds * 1000 - 20
+        segments, _ = self.model.transcribe(filename, language="ru", vad_filter=True, vad_parameters=dict(min_silence_duration_ms=ms), word_timestamps=True, beam_size=5, best_of=5, condition_on_previous_text=False) #max_initial_timestamp=0.5
         text_l: str = ""
         for segment in segments:
             text_i: str = segment.text
