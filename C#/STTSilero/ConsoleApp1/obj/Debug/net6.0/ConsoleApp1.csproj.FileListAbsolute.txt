@@ -1,0 +1,15 @@
+D:\work\whisper\C#\STTSilero\ConsoleApp1\bin\Debug\net6.0\ConsoleApp1.exe
+D:\work\whisper\C#\STTSilero\ConsoleApp1\bin\Debug\net6.0\ConsoleApp1.deps.json
+D:\work\whisper\C#\STTSilero\ConsoleApp1\bin\Debug\net6.0\ConsoleApp1.runtimeconfig.json
+D:\work\whisper\C#\STTSilero\ConsoleApp1\bin\Debug\net6.0\ConsoleApp1.dll
+D:\work\whisper\C#\STTSilero\ConsoleApp1\bin\Debug\net6.0\ConsoleApp1.pdb
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.csproj.AssemblyReference.cache
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.GeneratedMSBuildEditorConfig.editorconfig
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.AssemblyInfoInputs.cache
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.AssemblyInfo.cs
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.csproj.CoreCompileInputs.cache
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.dll
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\refint\ConsoleApp1.dll
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.pdb
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.genruntimeconfig.cache
+D:\work\whisper\C#\STTSilero\ConsoleApp1\obj\Debug\net6.0\ref\ConsoleApp1.dll

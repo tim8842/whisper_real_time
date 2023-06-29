@@ -66,7 +66,7 @@ def long_task(name: str) -> str:
 @application.route("/get_text_celery", methods=['POST'])
 def get_text_celery() -> Mapping[str, str]:
     request_log(request)
-    uploaded_file = request.files['document']
+    uploaded_file = request.files['audio']
     uploaded_file.filename = "/" + uploaded_file.filename.split("\\")[-1]
     filename: str = os.path.join(files_download_path, uploaded_file.filename)
     if uploaded_file.filename != '':
@@ -75,7 +75,7 @@ def get_text_celery() -> Mapping[str, str]:
             filename = filename[0:-4] +  str(rnd) +  filename[-4:]
         uploaded_file.save(filename)
         logger.debug(f"route: {request.path}, ip: {request.remote_addr}, saving_file: {filename}")
-    posted_data: Mapping[str, T] = json.load(request.files['datas'])                                                      
+    # posted_data: Mapping[str, T] = json.load(request.files['datas'])                                                      
     task = long_task.delay(filename)
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper celery start: task_id = {task.task_id}")  
     res = celery.AsyncResult(task.task_id)
@@ -90,7 +90,7 @@ def get_text_celery() -> Mapping[str, str]:
 @application.route("/get_text_process", methods=['POST'])
 def get_text_process():
     request_log(request)
-    uploaded_file = request.files['document']
+    uploaded_file = request.files['audio']
     uploaded_file.filename = "/" + uploaded_file.filename.split("\\")[-1]
     filename = files_download_path + uploaded_file.filename
     print(uploaded_file.filename)
@@ -101,13 +101,18 @@ def get_text_process():
             filename = filename[0:-4] +  str(rnd) +  filename[-4:]
         uploaded_file.save(filename)
         logger.debug(f"route: {request.path}, ip: {request.remote_addr}, saving_file: {filename}")
-    posted_data = json.load(request.files['datas']) 
+    # posted_data = json.load(request.files['datas']) 
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper start") 
     res = whisper.analyze(filename, remove=True, no_speech_prob=0.6) 
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper end")                                              
     answer = json.dumps({"answer": res})
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} request end, result: {json.loads(answer)}")   
     return answer
+
+@application.route("/test", methods=['POST'])
+def get_test():
+    request_log(request)
+    return {"answer": "hello"}
 
 if __name__ == "__main__":
     logger.debug("logger was initialized")
