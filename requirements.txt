@@ -1,0 +1,5 @@
+flask
+numpy
+faster_whisper
+soundfile
+waitress

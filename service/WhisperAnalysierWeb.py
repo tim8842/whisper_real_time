@@ -1,13 +1,10 @@
 import numpy as np
-from multiprocessing import Process, freeze_support
 from faster_whisper import WhisperModel
-import time
 import os
 import datetime
 import soundfile as sf
 from numpy.typing import NDArray
 from typing import List, Union, Optional
-import random
 
 class WhisperAnalysier():
     """
@@ -25,12 +22,9 @@ class WhisperAnalysier():
                 cuda - видеокарта, cpu - процессор
         """
         if model_type == "cuda":
-            try:
-                self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=12)
-            except:
-                self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=12)
-        else:
-            self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=12)
+     
+            self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=12)
+         
         self.data: Optional[NDArray] = None
         self.samplerate: Optional[int] = None
         self.noSections: Optional[int] = None
