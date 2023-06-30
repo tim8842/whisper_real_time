@@ -10,7 +10,7 @@ from LoggerConfig import get_logging_dict_config
 
 application = Flask(__name__)
 
-MODEL_SIZE = "large-v2"
+MODEL_SIZE = "base"
 TEST_FILE = "test/test.wav"
 
 logging.config.dictConfig(get_logging_dict_config())
@@ -45,9 +45,7 @@ def get_text_process():
     request_log(request)
     uploaded_file = request.files['audio']
     uploaded_file.filename = "/" + uploaded_file.filename.split("\\")[-1]
-    filename = files_download_path + uploaded_file.filename
-    print(uploaded_file.filename)
-    print(filename)
+    filename = os.path.join(files_download_path, uploaded_file.filename)
     if uploaded_file.filename != '':
         while os.path.exists(filename):
             rnd = random.randint(0, 10000)
@@ -56,7 +54,7 @@ def get_text_process():
         logger.debug(f"route: {request.path}, ip: {request.remote_addr}, saving_file: {filename}")
     # posted_data = json.load(request.files['datas']) 
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper start") 
-    res = whisper.analyze(filename, remove=True, no_speech_prob=0.6) 
+    res = whisper.analyze(filename, remove=True) 
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} whisper end")                                              
     answer = json.dumps({"answer": res})
     logger.debug(f"route: {request.path}, ip: {request.remote_addr} request end, result: {json.loads(answer)}")   

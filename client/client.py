@@ -1,6 +1,5 @@
 import requests, json
 import asyncio
-from flask import jsonify
 from typing import Mapping, List
 import os
 
