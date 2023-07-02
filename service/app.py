@@ -10,7 +10,7 @@ from LoggerConfig import get_logging_dict_config
 
 application = Flask(__name__)
 
-MODEL_SIZE = "base"
+MODEL_SIZE = "large-v2"
 TEST_FILE = "test/test.wav"
 
 logging.config.dictConfig(get_logging_dict_config())
@@ -21,6 +21,8 @@ files_download_path: str = os.path.abspath("sounds/")
 
 whisper = WhisperAnalysier(model_size=MODEL_SIZE)
 whisper.analyze(path=os.path.abspath(TEST_FILE))
+
+print("test analyze ended.")
 
 started_info: Mapping[str, Union[str, Mapping]] = {
     "WHISPER": {
