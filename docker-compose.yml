@@ -1,0 +1,26 @@
+# version: '4.17'
+
+# services:
+#   whisper:
+#     # Берем Dockerfile из каталога app
+#     build: .
+#     # Запускаем тестовый сервер
+#     runtime: nvidia
+#     command: python3 wsgi.py
+#     # куда будут помещены данные из каталога app
+#     # Открываем порт 5000 внутри и снаружи
+#     ports:
+#       - "5000:5000"
+version: "4.17"
+
+services:
+  whisper:
+    # Берем Dockerfile из каталога app
+    build: .
+    # Запускаем тестовый сервер
+    runtime: nvidia
+    command: python wsgi.py
+    # куда будут помещены данные из каталога app
+    # Открываем порт 5000 внутри и снаружи
+    ports:
+      - "5000:5000"

@@ -1,13 +1,10 @@
 import numpy as np
-from multiprocessing import Process, freeze_support
 from faster_whisper import WhisperModel
-import time
 import os
 import datetime
 import soundfile as sf
 from numpy.typing import NDArray
 from typing import List, Union, Optional
-import random
 
 class WhisperAnalysier():
     """
@@ -26,24 +23,23 @@ class WhisperAnalysier():
         """
         if model_type == "cuda":
             try:
-                self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=12)
+                self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=6)
             except:
-                self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=12)
+                self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
         else:
-            self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=12)
+            self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
+
         self.data: Optional[NDArray] = None
         self.samplerate: Optional[int] = None
         self.noSections: Optional[int] = None
         # self.transcribe_file: str =  transcribe_file
 
-    def __fileWhisperAnalyze(self, path: str, remove: Union[bool, int, None], no_speech_prob: float) -> str:
+    def __fileWhisperAnalyze(self, path: str, remove: Union[bool, int, None]) -> str:
         """
             Функция отвечает за анализ файла и выдачи теккстового результата
             Аргументы:
               path: Путь до файла (звукового), который нужно обработать
               remove: Удалять ли файл после анализа или нет
-              no_speech_prob: Значение вероятности, того, что на участке звуковой дорожке
-                нет речи. Если больше этой вероятности, то слова не будут определяться
             Возвращает:
               Строку, результат обработки
         """
@@ -59,13 +55,12 @@ class WhisperAnalysier():
         for segment in segments:
             text_i: str = segment.text
             text_l += text_i
-            print(segment)
         print(datetime.datetime.now() - now)
         if remove:
             os.remove(filename)
         return text_l
 
-    def analyze(self, path: str = "test.wav", remove:Union[bool, int, None] = False, no_speech_prob: float = 0.7) -> str:
+    def analyze(self, path: str = "test.wav", remove:Union[bool, int, None] = False) -> str:
         """
             Функция отвечает за считывание параметров звукового файла
             и применение функции анализа
@@ -80,7 +75,7 @@ class WhisperAnalysier():
         self.data, self.samplerate = sf.read(path)
         self.noSections = int(np.ceil(len(self.data) / self.samplerate))
         try:
-            return self.__fileWhisperAnalyze(path, remove, no_speech_prob)
+            return self.__fileWhisperAnalyze(path, remove)
         except FileNotFoundError as e:
             return "error"
  
