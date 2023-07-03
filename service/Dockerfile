@@ -1,7 +1,10 @@
 
 # FROM nvidia/cuda:11.2.2-cudnn8-runtime
 # #Меньше весит
-# ENV PYTHONUNBUFFERED=1
+
+# ENV PYTHONDONTWRITEBYTECODE 1
+# ENV PYTHONUNBUFFERED 1
+
 # RUN apt-key del 7fa2af80
 # RUN rm /etc/apt/sources.list.d/cuda.list
 # RUN rm /etc/apt/sources.list.d/nvidia-ml.list
@@ -34,6 +37,9 @@
 # RUN pip install -r requirements.txt
 
 FROM python:3.9 as ptn
+
+# ENV PYTHONDONTWRITEBYTECODE 1
+# ENV PYTHONUNBUFFERED 1
 
 RUN pip install --upgrade pip
 COPY . .

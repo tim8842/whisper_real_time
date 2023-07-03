@@ -22,12 +22,9 @@ class WhisperAnalysier():
                 cuda - видеокарта, cpu - процессор
         """
         if model_type == "cuda":
-            try:
-                self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=6)
-            except:
-                self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
-        else:
-            self.model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=6)
+     
+            self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=6)
+       
 
         self.data: Optional[NDArray] = None
         self.samplerate: Optional[int] = None
